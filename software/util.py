@@ -55,18 +55,5 @@ def connect(input_layer, layers):
     return layer
 
 
-def regularise(E, E_high=1e2, E_max=1e10):
-    '''
-    Regularise the energies. 
-    
-    E = E                              E < E_h
-    E = E_h + log(E-E_h+1)      E_h <= E < E_m
-    E = E_h + log(E_m-E_h+1)     E_m < E
-    
-    '''
-    E = tf.where(E<E_max, E, E_max*tf.ones(tf.shape(E)))
-    E_r = E_high + tf.where(E<E_high, E-E_high, tf.math.log(E-E_high+1))
-    return E_r
-
 def PM_pi(Traj):
     return (Traj +math.pi)%(2*math.pi) -math.pi
