@@ -56,4 +56,7 @@ def connect(input_layer, layers):
 
 
 def PM_pi(Traj):
+    '''
+    Converts an input sequence of angles to be in the interval [-pi, +pi]
+    '''
     return (Traj +math.pi)%(2*math.pi) -math.pi
