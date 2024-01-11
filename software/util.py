@@ -17,8 +17,9 @@ def conv_unit(n_type, dim, neurons=50):
     '''
     Small network that uses 1D convolutions. Used for S and T transformations that form a RealNVP block.
     
-    output_size (int): Number of output neurons
     n_type (char): Network type, Scaling network (s) or a Translation network (t)
+    dim (int): Dimensionality of the input tensor
+    neurons (int): neurons used in final few densely connected layers of the conv_unit
     '''
     n_type = n_type.lower()
     
