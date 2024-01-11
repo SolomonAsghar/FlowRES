@@ -1,6 +1,6 @@
-##########################################################
-# Types of Layers
-##########################################################
+'''
+Different invertible layers used by FlowRES
+'''
 import math
 import numpy as np
 import tensorflow as tf
@@ -11,6 +11,10 @@ from util import connect, regularise, AngleToPeriodic
 class AffineCoupling():
     '''
     A single affine coupling layer.
+
+    transforms [network,network]: A list containing a network for S transformation and T transformation
+    operand [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation operates upon.
+    conditioner [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation is conditioned by.
     '''
     def __init__(self, transforms, operand=None, conditioner=None):
         self.operand = operand
@@ -39,7 +43,7 @@ class AffineCoupling():
             x1 = X
             x2 = X_op
 
-        # Affine Transform
+        # Affine transform
         z1 = x1
         S_layer = connect(AngleToPeriodic(x1) if self.conditioner=='ang' else x1, self.S)
         T_layer = connect(AngleToPeriodic(x1) if self.conditioner=='ang' else x1, self.T)
@@ -67,7 +71,7 @@ class AffineCoupling():
             z1 = Z
             z2 = Z_op
         
-        # First invCoupling
+        # Inverse affine transform
         x1 = z1
         S_layer = connect(AngleToPeriodic(z1) if self.conditioner=='ang' else z1, self.S)
         T_layer = connect(AngleToPeriodic(z1) if self.conditioner=='ang' else z1, self.T)
@@ -82,7 +86,12 @@ class AffineCoupling():
 
 class Spline():
     '''
-    A spline layer.
+    A rational quadratic spline transform layer, as in arXiv:1906.04032
+
+    ParameterNetwork (network): A network that outputs the parameters used by the Spline, namely bin_widths, bin_heights, knot_slopes and phase_translation. 
+    range_min (float): The smallest value the spline covers, below this the function is linear.
+    operand [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation operates upon.
+    conditioner [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation is conditioned by.
     '''
     def __init__(self, ParameterNetwork, range_min, operand=None, conditioner=None):
         self.operand = operand
@@ -94,7 +103,6 @@ class Spline():
         self.ParameterNetwork = ParameterNetwork
         self.range_min = range_min
 
-    # @tf.function
     def XtoZ(self, X, X_op=None):
         '''
         Transforms X -> Z
@@ -120,7 +128,6 @@ class Spline():
 
         return [z1, z2]
     
-    # @tf.function
     def ZtoX(self, Z, Z_op=None):
         '''
         Transforms Z -> X
@@ -132,7 +139,7 @@ class Spline():
             z1 = Z
             z2 = Z_op
         
-        # # Undo Transform
+        # Undo Transform
         x1 = z1
         bin_widths, bin_heights, knot_slopes, phase_translation = connect(AngleToPeriodic(z1) if self.conditioner=='ang' else z1,
                                                                           [self.ParameterNetwork])
@@ -147,11 +154,14 @@ class Spline():
         return [x1, x2]
 
 
-
 class Inv_1x1(tf.keras.layers.Layer):
     '''
     A layer for invertible 1x1 convolutions
     Takes two inputs and stacks them, computes 1x1 convolution, unstacks.
+
+    curr_len (int): the current lenght of each sample matrix
+    curr_dim (int): the current width of each sample matrix
+    operand [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation operates upon.
     '''
     def __init__(self, curr_len, curr_dim, operand=None):
         self.operand = operand
@@ -164,7 +174,6 @@ class Inv_1x1(tf.keras.layers.Layer):
         w_init = np.linalg.qr(np.random.randn(self.curr_dim, self.curr_dim))[0]
         self.W = tf.Variable(initial_value=w_init, dtype='float32', trainable=True)
 
-    # @tf.function
     def call(self, input, direction):
         if direction == 'XtoZ':
             X = input
@@ -180,14 +189,12 @@ class Inv_1x1(tf.keras.layers.Layer):
             # self.log_Rzx_const = self.curr_len * tf.math.log(tf.math.abs(tf.linalg.det(value_inv_W)))
             return X
     
-    # @tf.function
     def XtoZ(self, X):
         X = tf.concat([X[0], X[1]], axis=2)
         Z = self(X, direction=('XtoZ'))
         Z = tf.split(Z, num_or_size_splits=2, axis=2)
         return Z
 
-    # @tf.function
     def ZtoX(self, Z):
         Z = tf.concat([Z[0], Z[1]], axis=2)
         X = self.call(Z, direction=('ZtoX'))
@@ -197,6 +204,9 @@ class Inv_1x1(tf.keras.layers.Layer):
 class Inv_1x1_restore(Inv_1x1):
     '''
     A layer for reversing an invertible 1x1 convolution.
+    Created for simplicity, but it's essentially the above with XtoZ and ZtoX flipped
+
+    Inv_1x1_layer (Inv_1x1): The Inv_1x1 you would like to invert.
     '''
     def __init__(self, Inv_1x1_layer):
         super(Inv_1x1_restore, self).__init__(Inv_1x1_layer.curr_len, int(Inv_1x1_layer.curr_dim/2),
@@ -220,9 +230,11 @@ class Alt_Channels():
     '''
     Splits data into seperate channels for X->Z, merges channels for Z->X
     A one dimensional version of checkerboard split used in RealNVP i.e. alternating pattern
-    curr_len (int): Contains the lenght of the vector this will accept, used to create a key for merging and splitting 
-    
     n.b.: named start as it is the first layer when going X->Z, however it will be the last when going Z->X.
+    
+    curr_len (int): Contains the lenght of the vector this will accept, used to create a key for merging and splitting 
+    operand [string]: May be 'ang' or 'pos'. Describes what this transformation operates upon.
+    conditioner [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation is conditioned by.
     ''' 
     def __init__(self, curr_len, operand=None):
         self.operand = operand
@@ -237,11 +249,9 @@ class Alt_Channels():
         self.split_key = [c_one, c_two]
         self.merge_key = np.argsort([item for sublist in self.split_key for item in sublist])
     
-    # @tf.function
     def XtoZ(self, X):
         return [tf.gather(X, i, axis=1) for i in self.split_key]
     
-    # @tf.function
     def ZtoX(self, Z):
         unsorted = tf.keras.layers.concatenate(Z, axis=1)
         return tf.gather(unsorted, self.merge_key, axis=1)
@@ -249,14 +259,16 @@ class Alt_Channels():
     
 class Squeeze():
     '''
-    Creates a pair of equally shaped tensors as input and 'stacks' them.
+    Creates a pair of equally shaped tensors using Alt_Channels and 'stacks' them.
+    
+    curr_len (int): Contains the lenght of the vector this will accept, used to create a key for merging and splitting 
+    operand [string]: May be 'ang' or 'pos'. Describes what this transformation operates upon.
     '''     
     def __init__(self, curr_len, operand=None):
         self.operand = operand
         self.conditioner = operand
         self.Alt_Channels = Alt_Channels(curr_len)
 
-    # @tf.function
     def XtoZ(self, X):
         x1_a, x1_b = self.Alt_Channels.XtoZ(X[0]) # 1,3,5,7.. -> [1,5,9..],[3,7,11...]
         x1 = tf.concat([x1_a, x1_b], axis=2) # stack along channel axis
@@ -266,7 +278,6 @@ class Squeeze():
 
         return [x1,x2]
 
-    # @tf.function
     def ZtoX(self, Z): # just the reverse of the above
         z2_a, z2_b = tf.split(Z[1], num_or_size_splits=2, axis=2)
         z2 = self.Alt_Channels.ZtoX([z2_a, z2_b])
@@ -279,28 +290,26 @@ class Squeeze():
 class Concat():
     '''
     Concatenate a pair of tensors 
+    operand [string]: May be 'ang' or 'pos'. Describes what this transformation operates upon.
     '''     
     def __init__(self, operand=None):
         self.operand = operand
         self.conditioner = operand
-    # @tf.function
     def XtoZ(self, X):
         return tf.concat(X, axis=1) # stack along time axis
-    # @tf.function
     def ZtoX(self, Z): # just the reverse of the above
         return tf.split(Z, num_or_size_splits=2, axis=1)
 
 class Split():
     '''
     Concatenate a pair of tensors 
+    operand [string]: May be 'ang' or 'pos'. Describes what this transformation operates upon.
     '''     
     def __init__(self, operand=None):
         self.operand = operand
         self.conditioner = operand
-    # @tf.function
     def XtoZ(self, X):
         return tf.split(X, num_or_size_splits=2, axis=1)
-    # @tf.function
     def ZtoX(self, Z): # just the reverse of the above
         return tf.concat(Z, axis=1) # stack along time axis
 
@@ -308,6 +317,11 @@ class Reshape():
     '''
     Reshapes the squeezed tensor back to its original shape, and ensures generated latent tensors get squeezed. 
     Needed as it makes concant of Exits easier; alternative is having a ZtoX network with floor((CBs-1)/(CBS_per_Exit))+1 inputs.
+
+    curr_len (int): the current lenght of each sample matrix
+    dim (int): the current width of each sample matrix
+    final (bool): Whether or not this is the final Reshape in the flow
+    operand [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation operates upon.
     ''' 
     def __init__(self, curr_len, dim, final=False, operand=None):
         self.operand = operand
@@ -316,13 +330,11 @@ class Reshape():
         self.dim = dim
         self.final = final
     
-    # @tf.function
     def XtoZ(self, X):
         if self.final == True:
             X = tf.concat(X, axis=1)
         return tf.keras.layers.Reshape((-1, self.dim))(X)
     
-    # @tf.function
     def ZtoX(self, Z):
         Z = tf.keras.layers.Reshape((self.curr_len, -1))(Z)
         if self.final == True:
@@ -331,7 +343,11 @@ class Reshape():
 
 class Exit():
     '''
-    Called whenever we finish a 'scale' and need to send half the latent tensor straight to the output
+    Used for early exist, when we need to factor out half the channels.
+
+    curr_len (int): the current lenght of each sample matrix
+    dim (int): the current width of each sample matrix
+    operand [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation operates upon.
     '''
     def __init__(self, curr_len, dim, operand=None):
         self.operand = operand
@@ -339,14 +355,12 @@ class Exit():
         self.Alt_Channels = Alt_Channels(curr_len)
         self.Reshape = Reshape(curr_len, dim)
     
-    # @tf.function
     def XtoZ(self, X):
         z1 = self.Reshape.XtoZ(X[0]) # this part exits; reshape it so it matches the final input = initial input
         z2 = self.Alt_Channels.XtoZ(X[1]) # This continues on so we need to split it into two channels
 
         return [z1, z2] # note that this is really [z1, [z2_a, z2_b]]
     
-    # @tf.function
     def ZtoX(self, Z): # Reverse of the above
         x2 = self.Alt_Channels.ZtoX(Z[1])
         x1 = self.Reshape.ZtoX(Z[0])
@@ -354,6 +368,12 @@ class Exit():
         return [x1, x2]
     
 class Swap_Channels():
+    '''
+    Swaps two channels
+
+    operand [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation operates upon.
+    conditioner [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation is conditioned by.
+    '''
     def __init__(self, operand=None):
         self.operand = operand
         self.conditioner = operand
@@ -365,6 +385,13 @@ class Swap_Channels():
         return [Z[1], Z[0]]
 
 class Weave():
+    '''
+    The opposite of an Alternate Split, weaves two channels together in a way that inverts alt split.
+
+    curr_len (int): Contains the lenght of the vector this will accept, used to create a key for merging and splitting 
+    operand [string]: May be 'ang' or 'pos'. Describes what this transformation operates upon.
+    conditioner [string]: May be 'ang' (for angles) or 'pos' (for positions). Describes what this transformation is conditioned by.
+    '''
     def __init__(self, curr_len, mode, operand=None):
         self.operand = operand
         self.conditioner = operand
@@ -385,7 +412,11 @@ class Weave():
         
 def Generate_restore_key(Shuffling_Layers, max_len, dims):
     ''' 
-    Ensures that temporal ordering is consistent between X and Z by calculating the changes made by all shuffling layers and inverting them
+    Ensures that temporal ordering is consistent across the whole flow by calculating the changes made by all layers and inverting them.
+
+    Shuffling_Layers (list of layers): A list of all the flows layers that effect temporal order.
+    max_len (int): The desired max path lenght
+    dims (int): The desired max path dimensions (excluding orientations)
     '''
     X = tf.range(0, max_len)
     X = [X for dim in range(dims)]
@@ -412,7 +443,7 @@ def Generate_restore_key(Shuffling_Layers, max_len, dims):
     
 class Restore():
     '''
-    Counter the shuffling that occours over the architecture
+    Counter the shuffling that occours over the architecture, using the restore key.
     ''' 
     def __init__(self, XtoZ_key, ZtoX_key, operand=None):
         self.operand = operand
