@@ -1,5 +1,5 @@
 '''
-WaveGlowNet for TPS of ABP. Function at end of file builds the network. 
+Network used by FlowRES for passive Brownian particle transition path sampling. Function at end of file builds the network. 
 '''
 import numpy as np
 import time 
@@ -19,13 +19,18 @@ from Layers import *
 ########################################################## 
 class network():
     '''
-    Assembles the layers(/models) passed to it by the function CreateBG into an invertible coupling flow 
+    Assembles the layers(/models) passed to it by the function "CreateFlowNet" into an invertible flow 
     
     layers (list): List of invertible layers/models
     num_outputs (int): How many different sections the output is split up due to the MSA 
     max_len (int): The lenght of the trajectories handled
     dim (int): The dimensionality of the data. Defaults to 2 to ensure older notebooks work.
     start ([float, float]): The coordinates of the first point in all trajs
+    tran_coeff [float]: Translational diffucion coefficient for the ABP.
+    rot_coeff [float]: Rotational diffusion coefficient for the ABP. Set to zero for passive systems.
+    act_coeff [float]: Activity coefficient for the ABP. Set to zero for passive systems.
+    pot_coeff [float]: Potential coefficient for the ABP
+    potential_grad [func]: A function that takes the position and returns the gradient of the potential
     '''
     def __init__(self, layers, num_outputs, max_len, dim, start, tran_coeff, rot_coeff, act_coeff, pot_coeff, potential_grad, network_mode):
         self.layers = layers[:-1]
@@ -100,7 +105,7 @@ class network():
         # Z_a = self.input_z_angles
         # Z_a = self.restore.ZtoX(Z_a)
 
-        # Prepare the invert the MSA by calculating the size of each split up section
+        # Prepare the invert the multi-scale architecture by calculating the size of each split up section
         if self.num_outputs > 1:
             size_splits = []
             for output in range(1, self.num_outputs):
@@ -114,7 +119,7 @@ class network():
         Z_p = input_p.pop(-1)
         # Z_a = input_a.pop(-1)
 
-        # Invert the MSA
+        # Invert the multi-scale architecture
         for layer in list(reversed(self.layers)):
             # Handle cases where we only operate on POS...
             if layer.conditioner == 'pos' and layer.operand == 'pos':
@@ -122,7 +127,7 @@ class network():
                     Z_p = [input_p.pop(-1), Z_p]
                 X_p = layer.ZtoX(Z_p)
                 Z_p = X_p
-            # # ... or ANG
+            # # ... or ANG, not required here as we deal with only passive systems
             # if layer.conditioner == 'ang' and layer.operand == 'ang':
             #     if isinstance(layer, Exit):
             #         Z_a = [input_a.pop(-1), Z_a]
@@ -140,7 +145,6 @@ class network():
 
         return X_p#, X_a
     
-    # @tf.function
     def build_net(self): 
         # X -> Z
         self.input_x_positions = tf.keras.layers.Input(shape=(self.max_len,self.dim-1))
@@ -158,7 +162,9 @@ class network():
 #################### DATA GEN ############################
     def Gaussian_Generator(self, size):
         '''
-        Generates a Gaussian walk to be used as a prior. 
+        Generates a Gaussian matrix to be used as a prior. 
+        
+        size [int,int]: the size of the desired prior = size of the desired paths
         '''
         while True: # or we only generate once
             Gaussian = np.random.normal(size=size)
@@ -167,6 +173,9 @@ class network():
     def Angle_Walk_Generator(self, starts, size):
         '''
         Generates a Gaussian angle walk. 
+
+        starts [float,float,float]: Starting x,y,theta of all paths
+        size [int,int]: the size of the desired prior = size of the desired paths
         '''
         while True: # or we only generate once
             # Create rotational walk
@@ -178,7 +187,6 @@ class network():
 ##########################################################
 #################### LOSSES ##############################
     @property
-    # @tf.function
     def log_Rxz(self):
         '''
         Calculates log_Rxz = log|det(Jxz)| for the network, for the current batch
@@ -195,7 +203,6 @@ class network():
         return Sum_var_log_Rxz_s + tf.math.reduce_sum(const_log_Rxz_s)
 
     @property  
-    # @tf.function
     def log_Rzx(self):
         '''
         Calculates log_Rzx = log|det(Jzx)| for the network, for the current batch
@@ -225,7 +232,6 @@ class network():
         z_pos = self.net_XtoZ.predict(x_pos)
         return z_pos
 
-    # def transform_ZtoX(self, z_pos, z_ang):
     def transform_ZtoX(self, z_pos):
         '''
         Apply the network to transform Z onto X
@@ -239,6 +245,9 @@ class network():
         return np.concatenate((starts[:,:,:2], x_pos), axis=1)
 
     def transform_ZtoX_weights(self, z_pos, net_ZtoX_Dual):
+        '''
+        Like transform_ZtoX, but returns a reweighting term alongside each sample 
+        '''
         x_pos, log_Rzx = net_ZtoX_Dual.predict([z_pos])
         starts = np.tile([-1,0,0], (len(z_pos),1,1)).astype('float32')
 
@@ -276,17 +285,39 @@ class network():
 ########################################################## 
 # Create, Save and Load Network
 ##########################################################
-def CreateBG(Num_Layers, FLOWS_pre_LAYER,
-             Pos_flows_per_Flow, Ang_flows_per_Flow, 
-             CCs, Pos_CC_per_Flow, Ang_CC_per_Flow,
-             Affine_WaveNet, Affine_WaveParams,
-             Spline_WaveNet, Spline_WaveParams, SplineParams, Spline_range_min,
-             start, tran_coeff, rot_coeff, act_coeff, pot_coeff,
-             potential_grad,
-             network_mode,
-             max_len=400, dim=2):
+def CreateFlowNet(Num_Layers, FLOWS_per_LAYER,
+                  Pos_flows_per_Flow, Ang_flows_per_Flow, 
+                  CCs, Pos_CC_per_Flow, Ang_CC_per_Flow,
+                  Affine_WaveNet, Affine_WaveParams,
+                  Spline_WaveNet, Spline_WaveParams, SplineParams, Spline_range_min,
+                  start, tran_coeff, rot_coeff, act_coeff, pot_coeff,
+                  potential_grad,
+                  network_mode,
+                  max_len=400, dim=2):
     '''
-    ### UPDATE THIS TEXT
+    Uses all the functions mentioned above to create the network. Takes hyperparameters describing network architecture. 
+
+    Num_Layers [int]: The number of scales.
+    FLOWS_per_Layer [int]: The number of complete flow steps
+    Pos_flows_per_Flow [int]: The number of positional affine coupling blocks, sandwiched between 1×1 convolutions and inverse 1×1 convolutions
+    Ang_flows_per_Flow [int]: The number of angular affine coupling blocks
+    CCs [int]: The number of cross coupling blocks
+    Pos_CC_per_Flow [int]: The number of position cross couplings (angle affects position) per cross coupling block
+    Ang_CC_per_Flow [int]: The number of position cross couplings (position affects angle) per cross coupling block
+    Affine_WaveNet [func]: Function describing architecture to be used by S and T networks for affine coupling transformations
+    Affine_WaveParams [dict]: Parameters passed to architecture to be used by S and T networks
+    Spline_WaveNet [func]: Function describing architecture to be used in generating rational quadratic spline transformations #
+    Spline_WaveParams [dict]: Parameters passed to architecture to be used for generating rational quadratic splines           # Splines are not used in the paper, so these
+    SplineParams [dict]: Parameters of the spline itself                                                                       # parameters can be ignored, just set to None.
+    Spline_range_min [float]: Minimum value of the range the spline covers.                                                    #
+    start ([float, float]): The coordinates of the first point in all trajs
+    tran_coeff [float]: Translational diffucion coefficient for the ABP.
+    rot_coeff [float]: Rotational diffusion coefficient for the ABP. Set to zero for passive systems.
+    act_coeff [float]: Activity coefficient for the ABP. Set to zero for passive systems.
+    pot_coeff [float]: Potential coefficient for the ABP
+    potential_grad [func]: A function that takes the position and returns the gradient of the potential
+    max_len (int): The lenght of the trajectories handled
+    dim (int): The dimensionality of the data. Defaults to 2 to ensure older notebooks work.
     '''  
     # Work out the number of outputs 
     num_outputs = Num_Layers
@@ -312,7 +343,7 @@ def CreateBG(Num_Layers, FLOWS_pre_LAYER,
         layers.append(Squeeze(curr_len, operand='ang'))
         shuffling_layers.append(Squeeze(curr_len))
         
-        for FLOW in range (FLOWS_pre_LAYER):
+        for FLOW in range (FLOWS_per_LAYER):
             for Pos_flow in range(Pos_flows_per_Flow):    
                 ## the two pos channels act on eachother
                 Invertible_1x1 = Inv_1x1(curr_len, curr_dim_pos, operand='pos')
@@ -362,14 +393,9 @@ def CreateBG(Num_Layers, FLOWS_pre_LAYER,
     #######################################
 
     print('... creating network')
-    BG = network(layers, num_outputs, max_len, dim, start, tran_coeff, rot_coeff, act_coeff, pot_coeff, potential_grad, network_mode)
+    FlowNet = network(layers, num_outputs, max_len, dim, start, tran_coeff, rot_coeff, act_coeff, pot_coeff, potential_grad, network_mode)
     print('Network created.')
     
-    return BG 
-
-
-
-def BG_build():
-    print('NewNetwork 2.3')
+    return FlowNet 
 ##########################################################
 ##########################################################
