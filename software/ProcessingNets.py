@@ -1,14 +1,15 @@
+'''
+Code for the neural networks used to implement S and T transformations
+'''
 import tensorflow as tf
 import math 
 
 class Wave_unit():
     '''
-    Based on wavenet.
-
-    Same instead of causal padding
+    Based on wavenet but same instead of causal padding, so it can look forward and backwards in time.
     
-    output_size (int): Number of output neurons
-    n_type (char): Network type, Scaling network (s) or a Translation network (t)
+    dim (int): Dimensionality of the input, i.e. width of the input tensors.
+    WaveParams (dict): Dictionary containing hyperparameters for the wavenet architecture, namely num_filters, kernel_size, num_dilated_conv_layers.
     '''
     def __init__(self, dim, WaveParams):
         self.dim = dim
@@ -149,17 +150,17 @@ class SplineReady_WaveUnit():
         conv_1x1_b = self.conv_1x1_b(conv_1x1_a)
         
         ### Seperate and prepare for Spline ###
-        raw_bin_widths, raw_bin_heights, raw_slopes, raw_pt = tf.split(conv_1x1_b, [self.dim*self.n_bins, self.dim*self.n_bins, self.dim*(self.n_bins-1), self.dim*1], axis=-1)
+        raw_bin_widths, raw_bin_heights, raw_slopes, raw_phase_translation = tf.split(conv_1x1_b, [self.dim*self.n_bins, self.dim*self.n_bins, self.dim*(self.n_bins-1), self.dim*1], axis=-1)
         rehsaped_bin_widths = tf.keras.layers.Reshape([self.curr_len, self.dim, self.n_bins])(raw_bin_widths)
         rehsaped_bin_heights = tf.keras.layers.Reshape([self.curr_len, self.dim, self.n_bins])(raw_bin_heights)
         rehsaped_slopes = tf.keras.layers.Reshape([self.curr_len, self.dim, self.n_bins-1])(raw_slopes)
-        rehsaped_pt = tf.keras.layers.Reshape([self.curr_len, self.dim])(raw_pt)
+        rehsaped_phase_translation = tf.keras.layers.Reshape([self.curr_len, self.dim])(raw_phase_translation)
 
         #########################################
         bin_widths = tf.math.softmax(rehsaped_bin_widths, axis=-1) * (self.spline_width - self.n_bins*self.min_bin_size) + self.min_bin_size
         bin_heights = tf.math.softmax(rehsaped_bin_heights, axis=-1) * (self.spline_width - self.n_bins*self.min_bin_size) + self.min_bin_size
         slopes = tf.math.softplus(rehsaped_slopes) + self.min_slope
-        pt = rehsaped_pt - math.log(math.exp(1.0-self.min_slope)-1.0)
+        phase_translation = rehsaped_phase_translation - math.log(math.exp(1.0-self.min_slope)-1.0)    
         #########################################
 
-        return bin_widths, bin_heights, slopes, pt
+        return bin_widths, bin_heights, slopes, phase_translation
