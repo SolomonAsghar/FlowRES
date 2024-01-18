@@ -11,7 +11,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/SolomonAsghar/Efficient-Rare-Event-Sampling-with-Unsupervised-Normalising-Flows">
-    <img src="FlowRes_Schematic" alt="FlowRES workflow schematic" height="1000">
+    <img src="FlowRes_Schematic.png" alt="FlowRES workflow schematic" height="100">
   </a>
 
 <h3 align="center">project_title</h3>
