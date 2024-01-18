@@ -1,5 +1,5 @@
 '''
-Functions and classes that use a FlowNet to conduct enhanced MCMC.
+Functions and classes that use a FlowNet to conduct enhanced MCMC of passive systems.
 '''
 import math
 import numpy as np
