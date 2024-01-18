@@ -5,7 +5,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/SolomonAsghar/Efficient-Rare-Event-Sampling-with-Unsupervised-Normalising-Flows" target="_blank">
+  <a target="_blank" href="https://github.com/SolomonAsghar/Efficient-Rare-Event-Sampling-with-Unsupervised-Normalising-Flows">
     <img src="FlowRes_Schematic.png" alt="FlowRES workflow schematic" height="200">
   </a>
 
