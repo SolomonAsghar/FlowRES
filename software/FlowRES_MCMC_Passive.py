@@ -42,9 +42,9 @@ def loss_ML_true(Net, starts, dX=0.001):
     return pos_latent_log_prob - Net.log_Rxz
 
 
-class Latent_MCMC():
+class FlowRes_MCMC():
     '''
-    Does MCMC in latent space, generating an asymptotically accurate ensemble and training a network.
+    Does MCMC using FlowRES proposals, generating an asymptotically accurate ensemble and training a network.
 
     Net [FlowNet]: A network, created via CreateFlowNet from Network_Passive.py
     num_chains [int]: The number of markov chains used when sampling, c_total in the paper.
@@ -233,6 +233,7 @@ class Latent_MCMC():
         iterations [int]: Max number of iterations desired, m_max in the paper. 
         iter_Train [int]: Number of sampling iterations before a training step, just set to 1 
         epochs [int]: Epochs of training per training step, just set to 1
+        file_loc [string]: Path to where you want to save the generated paths, network etc.
         save_each [int]: How regularly we should save, i.e. save each n iterations. 
         '''
         # Stuff carried through each loop #
