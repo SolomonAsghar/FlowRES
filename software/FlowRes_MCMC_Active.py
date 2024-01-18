@@ -7,7 +7,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import sys
 import os
-sys.path.append(r'/home/solomon.asghar/NF_TPS/software/')
+sys.path.append(r'Efficient-Rare-Event-Sampling-with-Unsupervised-Normalising-Flows/software/')
 from util import *
 from time import time
 from ABW_ProbEqs_Active import *
