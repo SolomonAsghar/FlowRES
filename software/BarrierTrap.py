@@ -8,9 +8,24 @@ from time import time
 
 class BarrierTrap():
     '''
-    Special double well that is single well far from origin, and has a barrier between the two wells
-    '''
+    Special double well that has a barrier between the two wells
 
+    params [dict]: Parameters that define the potential
+                   x_LW, y_LW = trap_center
+                   x_RW, y_RW = target_center
+                   k_wh = obstacle_height
+                   r_a = channel_r_a
+                   r_b = channel_r_b
+                   k_ws = squeeze
+                   1/k_wc = inv_obstacle_coverage
+
+                   # The following entries are not relevant to the paper as the values we used for them simplify out of the function
+                   trap_width = 1
+                   trap_exp = 2
+                   target_width = 1
+                   target_exp = 2
+                   
+    '''
     def __init__(self, params=None):
         self.params = params
         self.params['inv_obstacle_coverage'] = 1/params['obstacle_coverage']
@@ -53,6 +68,13 @@ class BarrierTrap():
         return E_obstacle + (E_trap * E_target)
 
     def batch_gradient(self, Trajs, mode, dx=0.001):
+        '''
+        Returns the gradient of the energy of the paths passed to it. 
+
+        Trajs [numpy array]: Array containing the path(s)
+        mode ['numpy' or 'TF']: Should this function use numpy or tensorflow operations. Use 'TF' when calling this as part of network training. 
+        dX [float]: Delta used for numerical differentiation
+        '''
         traj_shape = np.shape(Trajs)
         dX = np.tile([dx,0], (traj_shape[0], traj_shape[1], 1))
         dY = np.tile([0,dx], (traj_shape[0], traj_shape[1], 1))
@@ -70,6 +92,8 @@ class BarrierTrap():
     def plot_energy_surface(self, x_lim=2):
         '''
         Generates a contour plot showing the energy landscape
+
+        x_lim [float]: Defines xmax, xmin, ymax, ymin of the plot. 
         '''
         plt.rcParams['figure.figsize'] = 12, 10
         cmax =55
