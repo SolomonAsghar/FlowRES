@@ -1,7 +1,16 @@
+'''
+Contains functions to work out probability equations required for FlowRes training and for calculating acceptance probability.
+'''
 import numpy as np
 import math
 
 def Target_Prob(Net, pos, ang):
+    '''
+    Probability of the target distribution, i.e. pdf of the transition path distribution.
+
+    Net [FlowNet]: Network used to generate the paths.
+    pos [numpy array]: Array containing the positions we want to work out prob of. 
+    '''
     ### Append Starts
     starts = np.tile([Net.start], (len(pos),1,1))
     Positions = np.concatenate((starts[:,:,:2], pos), axis=1)   
@@ -32,6 +41,12 @@ def Target_Prob(Net, pos, ang):
     return np.exp(pos_log_prob + ang_log_prob)
 
 def Log_Target_Prob(Net, pos, ang):
+    '''
+    Log of probability of the target distribution, i.e. pdf of the transition path distribution.
+
+    Net [FlowNet]: Network used to generate the paths.
+    pos [numpy array]: Array containing the positions we want to work out prob of. 
+    ''' 
     ### Append Starts
     starts = np.tile([Net.start], (len(pos),1,1))
     Positions = np.concatenate((starts[:,:,:2], pos), axis=1)   
@@ -62,8 +77,12 @@ def Log_Target_Prob(Net, pos, ang):
     return pos_log_prob + ang_log_prob
 
 def Latent_Prob(Net, pos, ang):
-    
-    ### SIMPLIFY BY OVERLOOKING ANGLES ###
+    '''
+    Probability of samples from the base distribution.
+
+    pos [numpy array]: Positions from base path that we want to work out the probability of.
+    '''
+    ### SIMPLIFY BY OVERLOOKING ANGLES AS THEY ARE PREGENERATED ###
     # # Angles
     # starts = np.tile([Net.start], (len(pos),1,1))
     # Angles = np.concatenate((starts[:,:,2:], ang), axis=1)
@@ -71,7 +90,7 @@ def Latent_Prob(Net, pos, ang):
     # Ang_Increments = (Ang_Increments +math.pi)%(2*math.pi) -math.pi
     # ang_latent_log_prob = 1/(Net.basis_rot_coeff**2) * np.sum(np.cos(Ang_Increments), axis=(1,2))
     ang_latent_log_prob = 0
-    ### SIMPLIFY BY OVERLOOKING ANGLES ###
+    ### SIMPLIFY BY OVERLOOKING ANGLES AS THEY ARE PREGENERATED ###
 
     # Pos
     pos_latent_log_prob = - 0.5 * np.sum(pos**2, axis=(1,2))
@@ -79,7 +98,12 @@ def Latent_Prob(Net, pos, ang):
     return np.exp(ang_latent_log_prob + pos_latent_log_prob)
 
 def Log_Latent_Prob(Net, pos, ang):
-    ### SIMPLIFY BY OVERLOOKING ANGLES ###
+    '''
+    Log of probability of samples from the base distribution.
+
+    pos [numpy array]: Positions from base path that we want to work out the probability of.
+    '''
+    ### SIMPLIFY BY OVERLOOKING ANGLES AS THEY ARE PREGENERATED ###
     # # Angles
     # starts = np.tile([Net.start], (len(pos),1,1))
     # Angles = np.concatenate((starts[:,:,2:], ang), axis=1)
@@ -87,7 +111,7 @@ def Log_Latent_Prob(Net, pos, ang):
     # Ang_Increments = (Ang_Increments +math.pi)%(2*math.pi) -math.pi
     # ang_latent_log_prob = 1/(Net.basis_rot_coeff**2) * np.sum(np.cos(Ang_Increments), axis=(1,2))
     ang_latent_log_prob = 0
-    ### SIMPLIFY BY OVERLOOKING ANGLES ###
+    ### SIMPLIFY BY OVERLOOKING ANGLES AS THEY ARE PREGENERATED ###
 
     # Pos
     pos_latent_log_prob = - 0.5 * np.sum(pos**2, axis=(1,2))
