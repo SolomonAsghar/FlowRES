@@ -10,7 +10,7 @@ import os
 sys.path.append(r'/home/solomon.asghar/NF_TPS/software/')
 from util import *
 from time import time
-from ABW_ProbEqs_Active_Random_First import *
+from ABW_ProbEqs_Active import *
 
 ###############################################################
 def clip_reac(Trajs, energy_eq, e_cutoff, include_last=True):
