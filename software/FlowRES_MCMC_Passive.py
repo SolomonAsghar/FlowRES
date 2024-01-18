@@ -10,7 +10,7 @@ import os
 sys.path.append(r'/home/solomon.asghar/NF_TPS/software/')
 from util import *
 from time import time
-from ABW_Passive_ProbEqs import *
+from ABW_ProbEqs_Passive import *
 
 
 def Gaussian_Generator(size):
