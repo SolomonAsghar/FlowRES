@@ -8,9 +8,10 @@ from time import time
 
 class TwoChan_DoubleWell():
     '''
-    Provides energy function for a 2D double well system; used to calculate J_kl
-    '''
+    Contains functions relevant to two channel double well model.
 
+    params [dict]: Parameters that define potential. k_BH is 'TM' and the maximum energy of the target region is given by 'target'.  
+    '''
     def __init__(self, params):
         self.params = params
 
@@ -33,10 +34,17 @@ class TwoChan_DoubleWell():
         '''
         Takes xy and returns energy
         '''
-        E = self.params['energy_scale']*((x**4) - (2)*(y**2) + (y**4) + (78/37)*(x**2)*((y**2)-1) + (1/90)*y + 1.11097 + self.params['TM']*np.exp(-(x**2+y**2)/0.1))
+        E = 9*((x**4) - (2)*(y**2) + (y**4) + (78/37)*(x**2)*((y**2)-1) + (1/90)*y + 1.11097 + self.params['TM']*np.exp(-(x**2+y**2)/0.1))
         return E
 
     def batch_gradient(self, X, mode, dX=0.00001):
+        '''
+        Returns the gradient of the energy of the paths passed to it. 
+
+        X [numpy array]: Array containing the path(s)
+        mode ['numpy' or 'TF']: Should this function use numpy or tensorflow operations. Use 'TF' when calling this as part of network training. 
+        dX [float]: Delta used for numerical differentiation
+        '''
         x = X[:,:,0]
         y = X[:,:,1]
         
@@ -79,6 +87,10 @@ class TwoChan_DoubleWell():
     def plot_energy_surface(self, x_lim=2, cmax=15, sf=2):
         '''
         Generates a contour plot showing the energy landscape
+
+        x_lim [float]: Defines xmax, xmin, ymax, ymin of the plot. 
+        cmax [float]: Maximum energy value displayed on color plot.
+        sf [int]: Number of sig figs used for energy values displayed in the plot.
         '''
         plt.rcParams['figure.figsize'] = 18, 12
 
