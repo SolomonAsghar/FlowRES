@@ -2,18 +2,17 @@
 [![MIT License][license-shield]][license-url]
 
 <!-- PROJECT LOGO -->
-<br />
+
 <div align="center">
+  <h3 align="center">Efficient Rare Event Sampling with Unsupervised
+Normalising Flows</h3>
+  <br />
   <a href="https://github.com/SolomonAsghar/Efficient-Rare-Event-Sampling-with-Unsupervised-Normalising-Flows">
     <img src="FlowRes_Schematic.png" alt="FlowRES workflow schematic" height="200">
   </a>
-
-<h3 align="center">Efficient Rare Event Sampling with Unsupervised
-Normalising Flows</h3>
-
   <p align="justify">
-    This repo contains code used in the paper "Efficient Rare Event Sampling with Unsupervised Normalising Flows". A novel framework (FlowRes) is introduced that uses unsupervised normalising flow neural networks to enhance Monte Carlo sampling of rare events by generating high-quality nonlocal Monte Carlo proposals, featuring key advantages over established path samplers. 
     <br />
+    This repo contains code used in the paper "Efficient Rare Event Sampling with Unsupervised Normalising Flows". A novel framework (FlowRes) is introduced that uses unsupervised normalising flow neural networks to enhance Monte Carlo sampling of rare events by generating high-quality nonlocal Monte Carlo proposals, featuring key advantages over established path samplers. 
     <p align="center">
     <a target="_blank" href="https://arxiv.org/pdf/2401.01072.pdf"><strong>Link to paper »</strong></a>
     </p>
