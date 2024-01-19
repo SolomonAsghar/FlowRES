@@ -1,7 +1,7 @@
+<a name="readme-top"></a>
+
 [![LinkedIn][linkedin-shield]][linkedin-url]
 [![MIT License][license-shield]][license-url]
-
-<!-- PROJECT LOGO -->
 
 <div align="center">
   <h3 align="center">Efficient Rare Event Sampling with Unsupervised
