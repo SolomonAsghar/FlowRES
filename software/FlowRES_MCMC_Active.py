@@ -4,9 +4,7 @@ Functions and classes that use a FlowNet to conduct enhanced MCMC of active syst
 import math
 import numpy as np
 import tensorflow as tf
-import tensorflow_probability as tfp
 import sys
-import os
 sys.path.append(r'/home/solomon.asghar/NF_TPS/software/')
 from util import *
 from time import time
