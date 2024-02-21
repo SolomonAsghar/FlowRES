@@ -2,13 +2,10 @@
 Network used by FlowRES active Brownian particle transition path sampling. Function at end of file builds the network. 
 '''
 import numpy as np
-import time 
 import math
 import sys
 sys.path.append(r'/home/solomon.asghar/NF_TPS/software/')
 import tensorflow as tf
-import tensorflow_probability as tfp
-from tensorflow.keras.utils import Progbar
 tf.compat.v1.disable_eager_execution()
 
 from util import connect, regularise, AngleToPeriodic
