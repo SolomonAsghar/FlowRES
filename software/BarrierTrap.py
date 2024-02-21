@@ -1,10 +1,7 @@
-import sys
 import math
-import random
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from time import time
 
 class BarrierTrap():
     '''
