@@ -29,7 +29,7 @@ Normalising Flows</h1>
 FlowRES should be compatible with Windows, Mac, and Linux operating systems. It has been tested on ### and Windows 10.
 
 ### Dependencies
-FlowRES uses Python 3 with following libraries:
+FlowRES runs using Python 3 with following libraries:
 
 [![MatPlotLib][MatPlotLib-badge]][MatPlotLib-url]
 
