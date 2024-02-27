@@ -4,11 +4,10 @@ Network used by FlowRES for passive Brownian particle transition path sampling. 
 import numpy as np
 import math
 import sys
-sys.path.append(r'/home/solomon.asghar/NF_TPS/software/')
 import tensorflow as tf
 tf.compat.v1.disable_eager_execution()
 
-from util import connect, regularise, AngleToPeriodic
+from util import connect, AngleToPeriodic
 from Layers import *
 
 ########################################################## 
@@ -24,12 +23,10 @@ class network():
     dim (int): The dimensionality of the data. Defaults to 2 to ensure older notebooks work.
     start ([float, float]): The coordinates of the first point in all trajs
     tran_coeff [float]: Translational diffucion coefficient for the ABP.
-    rot_coeff [float]: Rotational diffusion coefficient for the ABP. Set to zero for passive systems.
-    act_coeff [float]: Activity coefficient for the ABP. Set to zero for passive systems.
     pot_coeff [float]: Potential coefficient for the ABP
     potential_grad [func]: A function that takes the position and returns the gradient of the potential
     '''
-    def __init__(self, layers, num_outputs, max_len, dim, start, tran_coeff, rot_coeff, act_coeff, pot_coeff, potential_grad, network_mode):
+    def __init__(self, layers, num_outputs, max_len, dim, start, tran_coeff, pot_coeff, potential_grad):
         self.layers = layers[:-1]
         self.restore = layers[-1]     # handle this order restoring layer differently
         self.num_outputs = num_outputs
@@ -37,11 +34,8 @@ class network():
         self.dim = dim
         self.start = start
         self.tran_coeff = tran_coeff
-        self.rot_coeff = rot_coeff
-        self.act_coeff = act_coeff
         self.pot_coeff = pot_coeff
         self.potential_grad = potential_grad
-        self.network_mode = network_mode
         self.build_net()           
         
     def connect_XtoZ(self):
@@ -166,21 +160,6 @@ class network():
         while True: # or we only generate once
             Gaussian = np.random.normal(size=size)
             yield Gaussian
-    
-    def Angle_Walk_Generator(self, starts, size):
-        '''
-        Generates a Gaussian angle walk. 
-
-        starts [float,float,float]: Starting x,y,theta of all paths
-        size [int,int]: the size of the desired prior = size of the desired paths
-        '''
-        while True: # or we only generate once
-            # Create rotational walk
-            Ang_Increments = np.random.normal(size=(size[0], size[1], 1), scale=self.rot_coeff)
-            Ang_Increments = np.concatenate((starts[:,:,2:], Ang_Increments), axis=1)
-            Ang_Walk = np.cumsum(Ang_Increments, axis=1)
-            Ang_Walk = Ang_Walk%(2*math.pi)
-            yield Ang_Walk[:,1:]
 ##########################################################
 #################### LOSSES ##############################
     @property
@@ -286,10 +265,8 @@ def CreateFlowNet(Num_Layers, FLOWS_per_LAYER,
                   Pos_flows_per_Flow, Ang_flows_per_Flow, 
                   CCs, Pos_CC_per_Flow, Ang_CC_per_Flow,
                   Affine_WaveNet, Affine_WaveParams,
-                  Spline_WaveNet, Spline_WaveParams, SplineParams, Spline_range_min,
-                  start, tran_coeff, rot_coeff, act_coeff, pot_coeff,
-                  potential_grad,
-                  network_mode,
+                  start, tran_coeff, pot_coeff, potential_grad,
+                  Spline_WaveNet=None, Spline_WaveParams=None, SplineParams=None, Spline_range_min=-math.pi,
                   max_len=400, dim=2):
     '''
     Uses all the functions mentioned above to create the network. Takes hyperparameters describing network architecture. 
@@ -309,8 +286,6 @@ def CreateFlowNet(Num_Layers, FLOWS_per_LAYER,
     Spline_range_min [float]: Minimum value of the range the spline covers.                                                    #
     start ([float, float]): The coordinates of the first point in all trajs
     tran_coeff [float]: Translational diffucion coefficient for the ABP.
-    rot_coeff [float]: Rotational diffusion coefficient for the ABP. Set to zero for passive systems.
-    act_coeff [float]: Activity coefficient for the ABP. Set to zero for passive systems.
     pot_coeff [float]: Potential coefficient for the ABP
     potential_grad [func]: A function that takes the position and returns the gradient of the potential
     max_len (int): The lenght of the trajectories handled
@@ -390,9 +365,8 @@ def CreateFlowNet(Num_Layers, FLOWS_per_LAYER,
     #######################################
 
     print('... creating network')
-    FlowNet = network(layers, num_outputs, max_len, dim, start, tran_coeff, rot_coeff, act_coeff, pot_coeff, potential_grad, network_mode)
+    FlowNet = network(layers, num_outputs, max_len, dim, start, tran_coeff, pot_coeff, potential_grad)
     print('Network created.')
     
     return FlowNet 
-##########################################################
 ##########################################################
