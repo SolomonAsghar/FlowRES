@@ -53,7 +53,7 @@ We provide two instructional IPython notebooks in the `demo` folder, guiding use
 These demos allow for reproduction of select figures from the FlowRES paper. 
 
 Demos are not included for the final two systems mentioned in the paper due to the high computational costs of their simulation.
-However, as the code associated with these potentials is provided (see `software/BarrierTrap.py` and `software/DoubleChannel.py`), straightforward modification of the demo notebooks will allow interested users to reproduce all figures from the paper.
+However, as the code associated with these systems is provided (see `software/BarrierTrap.py` and `software/DoubleChannel.py` for the potentials, and refer to the paper for parameters used), straightforward modification of the demo notebooks will allow interested users to reproduce all figures from the paper.
 
 <!-- LICENSE -->
 # License
