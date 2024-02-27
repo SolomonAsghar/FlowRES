@@ -4,11 +4,11 @@
 [![MIT License][license-shield]][license-url]
 
 <div align="center">
-  <h3 align="center">Efficient Rare Event Sampling with Unsupervised
-Normalising Flows</h3>
+  <h1 align="center">Efficient Rare Event Sampling with Unsupervised
+Normalising Flows</h1>
   <br />
   <a href="https://github.com/SolomonAsghar/Efficient-Rare-Event-Sampling-with-Unsupervised-Normalising-Flows">
-    <img src="FlowRES_Schematic.png" alt="FlowRES workflow schematic" height="200">
+    <img src="FlowRES_Schematic.png" alt="FlowRES workflow schematic" height="250">
   </a>
   <p align="justify">
     <br />
@@ -20,30 +20,56 @@ Normalising Flows</h3>
   </p>
 </div>
 
+# System Requirements
+## Hardware requirements
+----
 
-### Built With
+## Software requirements
+### OS Requirements
+FlowRES should be compatible with Windows, Mac, and Linux operating systems. It has been tested on  and Windows 10.
 
-* [![Python][Python-badge]][Python-url]
-* [![NumPy][NumPy-badge]][NumPy-url]
-* [![TensorFlow][TensorFlow-badge]][TensorFlow-url]
-* [![Keras][Keras-badge]][Keras-url]
+### Dependencies
+FlowRES is a Python package that uses the following libraries.
 
+[![MatPlotLib][MatPlotLib-badge]][MatPlotLib-url]
+
+[![NumPy][NumPy-badge]][NumPy-url]
+
+[![SciPy][SciPy-badge]][SciPy-url]
+
+[![TensorFlow][TensorFlow-badge]][TensorFlow-url]
+
+
+# Installation Guide
+Once the required libraries are installed, simply clone the repository with git:
+```
+git clone https://github.com/SolomonAsghar/FlowRES.git
+```
+You should then be able to use run the notebooks included in the `demo` folder. Note that `software` and `demo` must remain in the same folder.
+
+# Usage Instructions and Demo
+
+We provide two instructional IPython notebooks in the `demo` folder, guiding users through applying FlowRES to simulate active and passive Brownian particles exploring double well potentials.
+These demos allow for reproduction of select figures from the FlowRES paper. 
+
+Demos are not included for the final two systems mentioned in the paper due to the high computational costs of their simulation.
+However, as the code associated with these potentials is provided, straightforward modification of the demo notebooks will allow interested uses to reproduce all figures from the paper.
 
 <!-- LICENSE -->
-## License
+# License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 
 
 <!-- CONTACT -->
-## Contact
+# Contact
 
 Solomon Asghar - solomon.asghar.20@ucl.ac.uk
 
 
 <!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
+# Acknowledgments
 
 SA, QXP and GV are grateful to the studentship
 funded by the A*STAR-UCL Research Attachment Programme through the EPSRC M3S CDT (EP/L015862/1). RN acknowloedge the support by the Singapore Ministry of Education through the Academic Research Tier 2 Fund (MOE2019-T2-2-010)
@@ -92,3 +118,7 @@ and Tier 1 grant (RG59/21).
 [TensorFlow-url]: https://www.tensorflow.org/
 [Keras-badge]: https://img.shields.io/badge/Keras-%23D00000.svg?style=for-the-badge&logo=Keras&logoColor=white
 [Keras-url]: https://keras.io/
+[SciPy-badge]: https://img.shields.io/badge/SciPy-%230C55A5.svg?style=for-the-badge&logo=scipy&logoColor=%white
+[SciPy-url]: https://scipy.org/
+[MatPlotLib-badge]: https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black
+[MatPlotLib-url]: https://matplotlib.org/
