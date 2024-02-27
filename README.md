@@ -26,10 +26,10 @@ Normalising Flows</h1>
 
 ## Software requirements
 ### OS Requirements
-FlowRES should be compatible with Windows, Mac, and Linux operating systems. It has been tested on  and Windows 10.
+FlowRES should be compatible with Windows, Mac, and Linux operating systems. It has been tested on ### and Windows 10.
 
 ### Dependencies
-FlowRES is a Python package that uses the following libraries.
+FlowRES uses Python 3 with following libraries:
 
 [![MatPlotLib][MatPlotLib-badge]][MatPlotLib-url]
 
@@ -53,7 +53,7 @@ We provide two instructional IPython notebooks in the `demo` folder, guiding use
 These demos allow for reproduction of select figures from the FlowRES paper. 
 
 Demos are not included for the final two systems mentioned in the paper due to the high computational costs of their simulation.
-However, as the code associated with these potentials is provided, straightforward modification of the demo notebooks will allow interested uses to reproduce all figures from the paper.
+However, as the code associated with these potentials is provided (see `software/BarrierTrap.py` and `software/DoubleChannel.py`), straightforward modification of the demo notebooks will allow interested users to reproduce all figures from the paper.
 
 <!-- LICENSE -->
 # License
