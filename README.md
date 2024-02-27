@@ -26,7 +26,7 @@ Normalising Flows</h1>
 
 ## Software requirements
 ### OS Requirements
-FlowRES should be compatible with Windows, Mac, and Linux operating systems. It has been tested on Rocky Linux 8 and Windows 10.
+FlowRES is compatible with Windows and Unix operating systems. It has been tested on Rocky Linux 8 and Windows 10.
 
 ### Dependencies
 FlowRES runs using Python 3 with following libraries:
