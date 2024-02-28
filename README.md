@@ -25,6 +25,7 @@ Normalising Flows</h1>
 FlowRES can be run on any standard computer with enough RAM to support the operations defined by a user. The runtimes we report are generated using a computer with the following specs:
 
 RAM: 16 GB
+
 CPU: 6 cores, 3.2 GHz/core
 
 Runtimes will be significantly lower if CUDA-enabled GPUs are available. 
