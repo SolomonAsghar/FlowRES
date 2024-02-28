@@ -28,7 +28,7 @@ RAM: 16 GB
 
 CPU: 6 cores, 3.2 GHz/core
 
-Runtimes will be significantly lower if CUDA-enabled GPUs are available. 
+Runtimes will be substantially lower if CUDA-enabled GPUs are available. 
 
 ## Software requirements
 ### OS Requirements
@@ -59,7 +59,7 @@ We provide two instructional IPython notebooks in the `demo` folder, guiding use
 These demos allow for reproduction of select figures from the FlowRES paper. Each demo contains information about expected runtime for intensive cells. Cells without explicitly mentioned runtimes should be expected to run in well under a minute. 
 
 Demos are not included for the final two systems shown in the paper due to the longer runtimes of these simulations.
-However, as the code associated with these systems is provided (see `software/BarrierTrap.py` and `software/DoubleChannel.py` for the potentials, and refer to the paper for parameters used), straightforward modification of the demo notebooks will allow interested users (ideally with CUDA GPU availablility) to reproduce all figures from the paper.
+However, as the code associated with these systems is provided (see `software/BarrierTrap.py` and `software/DoubleChannel.py` for the potentials, and refer to the paper for parameters used), straightforward modification of the demo notebooks will allow interested users (ideally with CUDA GPU availability) to reproduce all figures from the paper.
 
 <!-- LICENSE -->
 # License
@@ -78,7 +78,7 @@ Solomon Asghar - solomon.asghar.20@ucl.ac.uk
 # Acknowledgments
 
 SA, QXP and GV are grateful to the studentship
-funded by the A*STAR-UCL Research Attachment Programme through the EPSRC M3S CDT (EP/L015862/1). RN acknowloedge the support by the Singapore Ministry of Education through the Academic Research Tier 2 Fund (MOE2019-T2-2-010)
+funded by the A*STAR-UCL Research Attachment Programme through the EPSRC M3S CDT (EP/L015862/1). RN acknowledge the support by the Singapore Ministry of Education through the Academic Research Tier 2 Fund (MOE2019-T2-2-010)
 and Tier 1 grant (RG59/21).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
