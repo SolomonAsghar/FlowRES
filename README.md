@@ -45,7 +45,7 @@ Once the required libraries are installed, simply clone the repository with git:
 ```
 git clone https://github.com/SolomonAsghar/FlowRES.git
 ```
-You should then be able to use run the notebooks included in the `demo` folder. Note that `software` and `demo` must remain in the same folder.
+This should only take ~1 min. After cloning the repo, you will be able to run the notebooks included in `demo`. Note that `software` and `demo` must remain in the same directory.
 
 # Usage Instructions and Demo
 
