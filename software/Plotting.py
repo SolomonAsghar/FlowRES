@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.patches as patches
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.lines import Line2D
 
 def JSD(Hist, val_Hist):
@@ -106,18 +105,14 @@ def clip_reac(Trajs, potential, include_last=True, return_lens=False):
     
 def Compare_Hists(NF_Hist_2D, Target_Hist_2D, bins, potential, text, Add_Scale_Bar=True, cmap=plasma_2, path=None):
     fsz = 33
-    
-    plt.rcParams['figure.figsize'] = 12, 12*1.03
+    plt.rcParams['figure.figsize'] = 12,12*1.03
     barrier_height = int(potential.params['k_BH'])
     main, ax1 = Plot_pc_Hist(NF_Hist_2D,  bins, c1='#3C91E6', lw=5, plot_target_well=True, potential=potential,
                  barrier_height=barrier_height, Add_Scale_Bar=Add_Scale_Bar, cmap=cmap, text=text)
     if path:
         ax1.plot(*path, color='white', linewidth=3)
     Plot_pc_Hist(Target_Hist_2D, bins, plot_xy=False, c1='#FDAB33', linestyle= (0, (10,5)), alph=0.0, lw=6, Add_Scale_Bar=False, zorder=1, cmap=cmap, text=text)
-    cbaxes = inset_axes(ax1,
-                        width="80%",  # width = 10% of parent_bbox width
-                        height="3.0%",  # height : 50%
-                        loc='lower center')
+    cbaxes = matplotlib.axes.Axes.inset_axes(ax1, bounds=(0.1,0.05, 0.8,0.05))
     cb = plt.colorbar(main, cax=cbaxes, ticklocation='top', 
                       label=r'$\hat{\rho}(x,y)$', orientation="horizontal")
     cbarticks = list(np.arange(*cbaxes.get_xlim(), 0.5))
@@ -130,7 +125,6 @@ def Compare_Hists(NF_Hist_2D, Target_Hist_2D, bins, potential, text, Add_Scale_B
     cb.outline.set_edgecolor('white')
     cb.set_label(r'$\hat{\rho}(x,y)$', color='white', labelpad=-15, fontsize=fsz)
     plt.show()
-    
     
 def Plot_pc_Hist(Hist_2D, bins, gs=gs, figsize=15, c1='blue', alph = 0.21, plot_xy=True, linestyle='solid', lw=5.0,
                  plot_target_well=False, potential=None, barrier_height=None, Add_Scale_Bar=True, zorder=1, cmap=None, text=None):
