@@ -56,7 +56,8 @@ This should only take ~1 min. After cloning the repo, you will be able to run th
 # Usage Instructions and Demo
 
 We provide two instructional IPython notebooks in the `demo` folder, guiding users through applying FlowRES to simulate active and passive Brownian particles exploring double well potentials.
-These demos allow for reproduction of select figures from the FlowRES paper. Each demo contains information about expected runtime for intensive cells. Cells without explicitly mentioned runtimes should be expected to run in well under a minute. 
+These demos allow for reproduction of select figures from the FlowRES paper. Each demo contains information about expected runtime for intensive cells. Cells without explicitly mentioned runtimes should be expected to run in well under a minute. Without GPU acceleration, `demo/DoubleWell_Passive` takes ca. 60 mins to run and `demo/DoubleWell_Active` takes ca. 90 mins.
+
 
 Demos are not included for the final two systems shown in the paper due to the longer runtimes of these simulations.
 However, the code associated with these systems is provided (see `software/BarrierTrap.py` and `software/DoubleChannel.py` for the potentials, and refer to the paper for parameters used). Straightforward modification of the demo notebooks will allow interested users (ideally with CUDA GPU availability) to reproduce all figures from the paper.
