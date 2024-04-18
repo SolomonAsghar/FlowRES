@@ -11,7 +11,7 @@ def JSD(Hist, val_Hist):
     Counts_x = np.sum(Hist, axis=0)
     Counts_y = np.sum(Hist, axis=1)
     val_Counts_x = np.sum(val_Hist, axis=0)
-    val_Counts_y = np.sum(Hist, axis=1)
+    val_Counts_y = np.sum(val_Hist, axis=1)
     JS_x = scipy.spatial.distance.jensenshannon(Counts_x, val_Counts_x, axis=(0))
     JS_y = scipy.spatial.distance.jensenshannon(Counts_y, val_Counts_y, axis=(0))
     return (JS_x + JS_y)/2
