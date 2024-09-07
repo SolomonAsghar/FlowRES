@@ -1,7 +1,10 @@
 <a name="readme-top"></a>
 
+[![DOI](https://zenodo.org/badge/605389074.svg)](https://zenodo.org/doi/10.5281/zenodo.13730315)
+
 [![LinkedIn][linkedin-shield]][linkedin-url]
 [![MIT License][license-shield]][license-url]
+
 
 <div align="center">
   <h1 align="center">Efficient Rare Event Sampling with Unsupervised
