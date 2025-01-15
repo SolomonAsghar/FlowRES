@@ -76,7 +76,7 @@ class FlowRes_MCMC():
     
     Net [FlowNet]: A network, created via CreateFlowNet from Network_Passive.py
     num_chains [int]: The number of markov chains used when sampling, c_total in the paper.
-    Sample_Buffer_Generator [func]: A function that generates an ensemble composed of each chains initial path, {w_c(0} in the paper. 
+    Sample_Buffer_Generator [func]: A function that generates an ensemble composed of each chains initial path, {w_c(0)} in the paper. 
     potential [func]: A function defining the potential used by the system we want to simulate.
     '''
     def __init__(self, Net, num_chains, Sample_Buffer_Generator, potential):
